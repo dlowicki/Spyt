@@ -1,0 +1,204 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 1rem;
+}
+
+html, body {
+  height: 100%;
+}
+
+#header {
+  background-color: rgba(37, 48, 61, 1);
+  text-align: center;
+  width: 100%;
+  height: auto;
+  max-height: 80px;
+}
+
+#header a {
+  display: block;
+  text-decoration: none;
+  color: white;
+  font-size: 2.5rem;
+  color: white;
+}
+
+#header img {
+  position: absolute;
+  width: 2%;
+  right: 0.25%;
+  top: 0.25%;
+}
+
+#header img:hover {
+  cursor: pointer;
+}
+
+/* MAIN */
+
+#main {
+  width: 80%;
+  height: auto;
+  min-height: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: auto;
+  margin-bottom: 5%;
+  margin-top: 2.5%;
+}
+
+/* MAIN Beitrag */
+
+#main-beitrag {
+  width: 80%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+}
+
+#main-beitrag button {
+  border: 0;
+  background-color: rgba(37, 48, 61, 1);
+  float: right;
+  padding: 0.75%;
+  margin-right: 5%;
+  color: white;
+}
+
+#main-beitrag button:hover {
+  cursor: pointer;
+}
+
+.beitrag {
+  background-color: rgba(37, 48, 61, 1);
+  width: 80%;
+  max-height: 250px;
+  height: auto;
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 1.5%;
+  margin-bottom: 1.5%;
+  float: left;
+  border-radius: 10px;
+}
+
+.beitrag-top {
+  width: 82%;
+  background-color: rgba(55, 65, 160, 0.5);
+  float: right;
+  padding-left: 2%;
+  border-bottom: 1px solid black;
+  color: white;
+  border-top-right-radius: 10px;
+}
+
+.beitrag-top span {
+  float: right;
+  padding: 1%;
+}
+
+.beitrag-top a {
+  display: block;
+  font-size: 1.5em;
+  padding-top: 0.5%;
+  padding-bottom: 0.5%;
+  color: white;
+  width: 30%;
+  text-decoration: underline;
+}
+
+.beitrag-account {
+  display: block;
+  background-color: rgba(30, 45, 120, 0.5);
+  width: 16%;
+  min-height: 100%;
+  height: auto;
+  text-align: center;
+  font-size: 1em;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.beitrag-account h3 {
+  font-size: 1em;
+  width: 80%;
+  padding-left: 10%;
+  padding-right: 10%;
+  padding-bottom: 5%;
+  color: white;
+  font-weight: 100;
+}
+
+.beitrag-account img {
+  width: 80%;
+  padding: 10%;
+}
+
+.beitrag-text {
+  width: 80%;
+  padding: 2%;
+  max-height: 100px;
+  height: auto;
+  float: right;
+  color: white;
+}
+
+/* ACCOUNT */
+
+#main-account {
+  width: 80%;
+  height: auto;
+  min-height: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: auto;
+  margin-bottom: 5%;
+  margin-top: 2.5%;
+}
+
+#main-account form {
+  background-color: rgba(37, 48, 61, 1);
+  width: 20%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 2.5%;
+  padding-top: 2.5%;
+}
+
+#main-account form p {
+padding: 1%;
+width: 80%;
+margin-right: auto;
+margin-left: auto;
+font-size: 1.2em;
+margin-top: 4%;
+color: white;
+}
+
+#main-account form p input {
+  border: 0;
+  padding: 1%;
+  width: 100%;
+}
+
+#main-account form input[type=submit] {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  margin-top: 6%;
+  margin-bottom: 3%;
+  color: white;
+  border: 0;
+  background-color: transparent;
+  font-size: 1.5em;
+  transition: 0.5s;
+}
+
+#main-account form input[type=submit]:hover {
+  cursor: pointer;
+  color: darkgray;
+}
