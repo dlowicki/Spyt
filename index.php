@@ -17,7 +17,7 @@ session_start();
 
     <div id="main">
       <div id="main-beitrag">
-        <button>Beitrag erstellen</button>
+        <button onClick="createArticle()">Beitrag erstellen</button>
         <div class="beitrag"> <!-- Rubrik hat eigene Farbe border-top -->
           <div class="beitrag-top"><span>19.02.2020</span><a href="">textUeberschrift</a></div>
           <div class="beitrag-text"><p>Test 123</p></div>

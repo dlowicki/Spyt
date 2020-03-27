@@ -5,7 +5,7 @@ session_start();
 <html lang="ger" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>Startseite | Schwarzes Brett</title>
+    <title>Login | Schwarzes Brett</title>
     <link href="../style.css" rel="stylesheet">
     <script src="../admin/script.js"></script>
   </head>
