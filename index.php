@@ -1,5 +1,6 @@
 <?php
 session_start();
+require("admin/script.php");
 ?>
 <!DOCTYPE html>
 <html lang="ger" dir="ltr">
@@ -18,34 +19,30 @@ session_start();
     <div id="main">
       <div id="main-beitrag">
         <button onClick="createArticle()">Beitrag erstellen</button>
-        <div class="beitrag"> <!-- Rubrik hat eigene Farbe border-top -->
-          <div class="beitrag-top"><span>19.02.2020</span><a href="">textUeberschrift</a></div>
-          <div class="beitrag-text"><p>Test 123</p></div>
-          <div class="beitrag-account"><img src="img/icon/account.svg"><h3>anzeigeVorname</h3></div>
-        </div>
+        <?php
+        $anzeigen = getAnzeigen();
+        foreach($anzeigen as $key) {
+          echo '<div class="beitrag" style="border-top: 4px solid ' . $key['rubrikFarbe'] . '">'; // border-top
+          echo '<div class="beitrag-top"><span>' . $key['anzeigeDatum'] . '</span><a href="anzeige.php?id=' . $key['anzeigeID'] . '">' . $key['textUeberschrift'] . '</a></div>';
+          echo '<div class="beitrag-text"><p>' . $key['texteText'] . '</p></div>';
+          echo '<div class="beitrag-account"><img src="img/icon/account.svg"><h3>' . $key['anzeigeVorname'] . ' ' . $key['anzeigeName'] . '</h3></div>';
+          echo '<div class="beitrag-img">';
+          $bilder = getBilder($key['anzeigeID']);
+          foreach($bilder as $key2){
+            echo "<img src='" . $key2['bilderDatei'] . "' class='pay-vorschau-img' onClick='viewBild(" . $key2['bilderID'] . ")'>";
+          }
+          echo '</div>';
+          echo '</div>';
+        }
 
-        <div class="beitrag"> <!-- Rubrik hat eigene Farbe border-top -->
-          <div class="beitrag-top"><span>19.02.2020</span><a href="">textUeberschrift</a></div>
-          <div class="beitrag-text"><p>Test 123</p></div>
-          <div class="beitrag-account"><img src="img/icon/account.svg"><h3>anzeigeVorname</h3></div>
-        </div>
-
-        <div class="beitrag"> <!-- Rubrik hat eigene Farbe border-top -->
-          <div class="beitrag-top"><span>19.02.2020</span><a href="">textUeberschrift</a></div>
-          <div class="beitrag-text"><p>Test 123</p></div>
-          <div class="beitrag-account"><img src="img/icon/account.svg"><h3>anzeigeVorname</h3></div>
-        </div>
-
-        <div class="beitrag"> <!-- Rubrik hat eigene Farbe border-top -->
-          <div class="beitrag-top"><span>19.02.2020</span><a href="">textUeberschrift</a></div>
-          <div class="beitrag-text"><p>Test 123</p></div>
-          <div class="beitrag-account"><img src="img/icon/account.svg"><h3>anzeigeVorname</h3></div>
-        </div>
+        ?>
       </div>
     </div>
 
     <script>
-
+    function viewBild(id) {
+      window.location.href = "anzeige.php?img=" + id;
+    }
     </script>
 
   </body>

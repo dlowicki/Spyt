@@ -107,15 +107,15 @@ html, body {
   padding-top: 0.5%;
   padding-bottom: 0.5%;
   color: white;
-  width: 30%;
+  width: 60%;
   text-decoration: underline;
+  overflow: hidden;
 }
 
 .beitrag-account {
   display: block;
   background-color: rgba(30, 45, 120, 0.5);
   width: 16%;
-  min-height: 100%;
   height: auto;
   text-align: center;
   font-size: 1em;
@@ -128,7 +128,7 @@ html, body {
   width: 80%;
   padding-left: 10%;
   padding-right: 10%;
-  padding-bottom: 5%;
+  padding-bottom: 10%;
   color: white;
   font-weight: 100;
 }
@@ -136,6 +136,36 @@ html, body {
 .beitrag-account img {
   width: 80%;
   padding: 10%;
+  padding-top: 20%;
+  padding-bottom: 20%;
+}
+
+#beitrag-account-vorschau {
+  display: block;
+  background-color: rgba(30, 45, 120, 0.5);
+  width: 16%;
+  height: auto;
+  text-align: center;
+  font-size: 1em;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+#beitrag-account-vorschau h3 {
+  font-size: 1em;
+  width: 80%;
+  padding-left: 10%;
+  padding-right: 10%;
+  padding-bottom: 10%;
+  color: white;
+  font-weight: 100;
+}
+
+#beitrag-account-vorschau img {
+  width: 80%;
+  padding: 10%;
+  padding-top: 10%;
+  padding-bottom: 15%;
 }
 
 .beitrag-text {
@@ -145,6 +175,26 @@ html, body {
   height: auto;
   float: right;
   color: white;
+  white-space: wrap;
+  word-wrap: break-word;
+}
+
+.beitrag-img {
+  width: 80%;
+  margin-top: -11%;
+  float: right;
+}
+
+.pay-vorschau-img {
+  width: 5vw;
+  height: 10vh;
+  margin-right: 1%;
+  transition: 0.5s;
+}
+
+.pay-vorschau-img:hover {
+  cursor: pointer;
+  opacity: 0.8;
 }
 
 /* ACCOUNT */
@@ -158,6 +208,27 @@ html, body {
   overflow: auto;
   margin-bottom: 5%;
   margin-top: 2.5%;
+}
+
+#account-angemeldet {
+  text-align: center;
+}
+
+#account-angemeldet h2 {
+  font-size: 1.5em;
+}
+
+#account-angemeldet a {
+  display: block;
+  text-decoration: none;
+  color: black;
+  padding: 0.25%;
+  transition: 0.5s;
+  margin: 1%;
+}
+
+#account-angemeldet a:hover {
+  color: darkgray;
 }
 
 #main-account form {
@@ -216,10 +287,37 @@ color: white;
   margin-top: 2.5%;
 }
 
+#create-info {
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 5%;
+  padding: 1%;
+  height: 100px;
+  -webkit-box-shadow: 2px 2px 5px -4px rgba(0,0,0,0.75);
+  -moz-box-shadow: 2px 2px 5px -4px rgba(0,0,0,0.75);
+  box-shadow: 2px 2px 5px -4px rgba(0,0,0,0.75);
+  -webkit-animation: infoShow 1s;
+}
+
+#create-info h1 {
+  font-size: 1.5em;
+  margin-bottom: 1%;
+}
+
+@-webkit-keyframes infoShow {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 #create-container {
   background-color: rgba(37, 48, 61, 1);
   width: 80%;
-  height: 230px;
+  height: 330px;
   margin-left: 10%;
   margin-right: 10%;
   margin-top: 1.5%;
@@ -228,7 +326,8 @@ color: white;
 }
 
 #create-container form {
-
+  width: 100%;
+  height: 330px;
 }
 
 #create-container form textarea {
@@ -238,6 +337,15 @@ color: white;
   margin-right: auto;
   width: 50%;
   margin-left: 15%;
+}
+
+#count {
+  position: absolute;
+  margin-left: 15%;
+  margin-top: -1.5%;
+  font-size: 1.1em;
+  color: white;
+  font-weight: 100;
 }
 
 #create-container form input[type=text] {
@@ -265,11 +373,26 @@ color: white;
   color: white;
 }
 
+#create-container form input[type=submit] {
+  margin-left: 5%;
+  padding: 0.25% 1% 0.25% 1%;
+}
+
+#create-container form label {
+  float: left;
+  margin-top: 5%;
+  padding: 0.5%;
+  color: white;
+}
+
+#create-container form label select {
+  padding: 2%;
+}
+
 #create-sidebar {
   width: 16%;
   float: left;
-  height: auto;
-  max-height: 108px;
+  height: 206px;
   border-bottom-left-radius: 10px;
   border-top-left-radius: 10px;
   padding: 5% 0% 5% 0%;
@@ -284,7 +407,7 @@ color: white;
 }
 
 #create-sidebar ul li {
-  padding: 9%;
+  padding: 5%;
   transition: 0.5s;
   color: white;
 }
@@ -292,4 +415,186 @@ color: white;
 #create-sidebar ul li:hover {
   background-color: rgba(37, 48, 61, 1);
   cursor: pointer;
+}
+
+#vorschau {
+  display: none;
+}
+
+.HoverClassDisabled:hover {cursor: not-allowed !important;}
+.HoverClassPointer:hover {cursor: pointer !important;}
+
+/* PAY */
+
+#main-pay {
+  width: 80%;
+  height: auto;
+  min-height: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: auto;
+  margin-bottom: 5%;
+  margin-top: 2.5%;
+}
+
+#pay-container {
+  width: 100%;
+  min-height: 600px;
+  height: auto;
+}
+
+.pay-vorschau {
+  margin-top: -5%;
+}
+
+.pay-zahlung {
+  width: 99%;
+  margin-top: 5%;
+  height: auto;
+  float: left;
+  border-radius: 10px;
+  border: 1px solid rgba(37, 48, 61, 1);
+  padding: 1% 0% 1% 0%;
+}
+
+#pay-uebersicht {
+  width: 25%;
+  background-color: rgba(37, 48, 61, 1);
+  color: white;
+  margin-left: 3%;
+  float: left;
+  padding: 1% 1% 1% 1%;
+}
+
+#pay-uebersicht h3 {
+  font-size: 1.3em;
+  padding: 1%;
+  text-align: center;
+}
+
+#pay-uebersicht p {
+  margin: 1%;
+  text-align: center;
+}
+
+#pay-uebersicht table {
+  padding: 1%;
+  margin-left: auto;
+  margin-right: auto;
+  width: 20%;
+}
+
+#pay-uebersicht table tr {
+ text-align: right;
+ padding: 0% 10% 0% 30%;
+
+}
+
+#pay-uebersicht table tr td {
+ font-size: 1.1em;
+}
+.summe {
+  border-top: 1px solid white;
+  padding: 5% 0% 1% 0%;
+}
+
+#pay-uebersicht ul {
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+  list-style: none;
+  text-align: left;
+}
+
+#pay-uebersicht ul li {
+  font-size: 1.1em;
+}
+
+
+#pay-bezahlung {
+  width: 40%;
+  margin-left: auto;
+  margin-right: 15%;
+}
+
+.pay-bezahlung-radio img {
+  width: 100%;
+  background-color: white;
+  height: 7vh;
+}
+
+.bezahlung {
+  width: 20%;
+  margin-top: 1%;
+  display: inline-block;
+  margin: 0% 2% 0% 2%;
+}
+
+.bezahlung img {
+  margin-bottom: 5%;
+}
+
+.bezahlung p {
+  text-align: center;
+}
+
+.pay-form {
+  color: white;
+  background-color: rgba(37, 48, 61, 1);
+  width: 60%;
+  min-height: 80px;
+  text-align: center;
+  padding-bottom: 2%;
+  margin-left: auto;
+  margin-right: 5%;
+  margin-top: 1%;
+}
+
+.pay-form h3 {
+ font-size: 1.3em;
+ padding: 2% 0% 2% 0%;
+}
+
+#form-upload {
+  text-align: center;
+  color: white;
+  width: 50%;
+  float: right;
+}
+
+#form-upload h3 {
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: 100;
+  margin-bottom: 0%;
+  margin-top: -5%;
+}
+
+#form-kredit {
+  width: 50%;
+}
+
+.pay-form input {
+  width: 75%;
+  margin-top: 2%;
+}
+
+.pay-form input[type=submit] {
+  width: 25%;
+  border: 0;
+  font-size: 1.2em;
+  padding: 0.5%;
+}
+
+.pay-form input[type=submit]:hover {
+cursor: pointer;
+}
+
+.pay-form select {
+  width: 75%;
+  margin-top: 2%;
+}
+
+#pay-error {
+  display: none;
 }

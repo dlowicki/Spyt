@@ -15,10 +15,28 @@ session_start();
       <img src="../img/icon/account.svg" onClick="registerUser()">
     </div>
 
+    <?php
+      if(isset($_POST['button'])){
+        if(isset($_POST['name']) && isset($_POST['vorname']) && isset($_POST['plz']) && isset($_POST['ort']) && isset($_POST['strasse']) && isset($_POST['tnr'])){
+          $name = str_replace(";", "", $_POST['name']);
+          $vorname = str_replace(";", "", $_POST['vorname']);
+          $plz = str_replace(";", "", $_POST['plz']);
+          $ort = str_replace(";", "", $_POST['ort']);
+          $st = str_replace(";", "", $_POST['strasse']);
+          $tnr = str_replace(";", "", $_POST['tnr']);
+
+          if($name != "" && $vorname != "" && $plz != "" && $ort != "" && $st != "" && $tnr != ""){
+            setcookie("user", $name . ";" . $vorname . ";" . $plz . ";" . $ort . ";" . $st . ";" . $tnr, time()+3600*24*365 ,"/");
+            header("Location: ../");
+          }
+        }
+      }
+    ?>
+
     <div id="main-account">
       <?php
-      if(!isset($_SESSION['user'])){
-        echo '<form method="POST" action="script.php">
+      if(!isset($_COOKIE['user'])){
+        echo '<form method="POST" action="account.php">
                 <p>Name:<br><input type="text" name="name" placeholder="Name"></p>
                 <p>Vorname:<br><input type="text" name="vorname" placeholder="Vorname"></p>
                 <p>Postleitzahl:<br><input type="text" name="plz" placeholder="PLZ"></p>
@@ -28,7 +46,8 @@ session_start();
                 <input type="submit" value="Erstellen" name="button">
               </form>';
       } else {
-        echo 'Sie sind bereits angemeldet!';
+        echo '<div id="account-angemeldet"><h2>Sie sind bereits angemeldet!</h2>';
+        echo '<a href="logout.php">Abmelden</a></div>';
       }
       ?>
 
