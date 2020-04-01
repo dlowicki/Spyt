@@ -12,7 +12,7 @@ session_start();
   <body>
     <div id="header">
       <h1><a href="../">Schwarzes Brett</a></h1>
-      <img src="../img/icon/account.svg" onClick="registerUser()">
+      <img src="../img/icon/account.svg">
     </div>
 
     <?php
