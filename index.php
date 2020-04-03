@@ -29,19 +29,48 @@ require("admin/script.php");
           echo '<div class="beitrag-img">';
           $bilder = getBilder($key['anzeigeID']);
           foreach($bilder as $key2){
-            echo "<img src='" . $key2['bilderDatei'] . "' class='pay-vorschau-img' onClick='viewBild(" . $key2['bilderID'] . ")'>";
+            //echo "<img src='" . $key2['bilderDatei'] . "' class='pay-vorschau-img' onClick='viewBild(" . $key2['bilderID'] . ")'>";
+
+            echo "<div class='container-img'>";
+            echo "<img src='" . $key2['bilderDatei'] . "' id='myImg' onClick='openImg(";
+                echo '"' . $key2['bilderDatei'] . '"';
+                echo ")'>";
+            echo "</div>";
           }
           echo '</div>';
           echo '</div>';
         }
 
         ?>
+        <div id="myModal" class="modal">
+          <span class="close">&times;</span>
+          <img class="modal-content" id="img01">
+        </div>
       </div>
     </div>
 
     <script>
     function viewBild(id) {
       window.location.href = "anzeige.php?img=" + id;
+    }
+
+    // Get the modal
+    var modal = document.getElementById('myModal');
+
+    var img = document.getElementById('myImg');
+    var modalImg = document.getElementById("img01");
+
+     function openImg(sourc){
+      modal.style.display = "block";
+      modalImg.src = sourc;
+    }
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+      modal.style.display = "none";
     }
     </script>
 

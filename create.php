@@ -24,7 +24,8 @@ if(!isset($_COOKIE['user'])){
       <div id="create-info">
         <h1>Willkommen bei Schwarzes Brett</h1>
         <p>hier kannst du Anzeigen aufgeben und einsehen. Pro Anzeige spendet der Mitarbeiter einen Betrag, der sich aus der Textlänge
-          <b>(pro Zeichen 1 cent)</b> und der hochgeladenen Bilder <b>(pro Bild 20 cent)</b> errechnet. Es können maximal 3 Bilder hochgeladen werden.</p>
+          <b>(pro Zeichen 1 cent)</b> und der hochgeladenen Bilder <b>(pro Bild 20 cent)</b> errechnet. Es können maximal 3 Bilder hochgeladen werden.
+          Bevor eine Anzeige weitergeführt werden kann, muss vorher eine <b>Vorschau</b> erstellt werden!</p>
       </div>
       <div id="create-container">
         <div id="create-sidebar">
@@ -37,7 +38,7 @@ if(!isset($_COOKIE['user'])){
           <form method="POST" action="pay.php" enctype="multipart/form-data">
             <input type="text" name="ueberschrift" id="vorschau-ueberschrift-form" placeholder="Überschrift">
             <input type="hidden" name="user" id="vorschau-account-form" value="<?php $user = $_COOKIE['user']; $user = explode(";", $user); echo $user[1]. " " . $user[0]; ?>">
-            <span>27.03.2020</span>
+            <span id="datum"><?php echo echoDate(); ?></span>
             <label>Rubrik: <select id="rubrik" name="rubrik">
               <?php
                 $data = getRubriken();
@@ -87,8 +88,8 @@ if(!isset($_COOKIE['user'])){
           document.getElementById("vorschau").style.display = "block";
           setTimeout(function(){
             document.getElementById("vorschau-ueberschrift").innerHTML = ueberschrift;
-            var datum = new Date();
-            document.getElementById("vorschau-datum").innerHTML = datum.getDate() + "." + datum.getMonth() + "." + datum.getFullYear();
+            var datum = document.getElementById("datum").innerHTML;
+            document.getElementById("vorschau-datum").innerHTML = datum;
             setTimeout(function(){
               var account = document.getElementById("vorschau-account-form").value;
               document.getElementById("vorschau-account").innerHTML = account;

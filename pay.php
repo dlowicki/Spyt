@@ -87,7 +87,11 @@ if(!isset($_COOKIE['user'])){
                 $dir = "img/";
                 $file = $dir . basename($_FILES["bild$t"]['name']);
                 $check = getimagesize($_FILES["bild$t"]["tmp_name"]);
-                if($check !== false && !file_exists($file)){
+                if($check !== false){
+                  if(file_exists($file)){
+                    compareBilder($file, $anzID);
+                    continue;
+                  }
                   if(!move_uploaded_file($_FILES["bild$t"]["tmp_name"], $file)){
                     echo "<div id='error'><p>Die Bilder konnten nicht hochgeladen werden! [87]</p></div>";
                   } else {
@@ -102,9 +106,11 @@ if(!isset($_COOKIE['user'])){
               }
             }
           }
-
+          header("Location: index.php");
+        } else {
+          echo "<div id='error'><p>Fehler wurde erzeugt</p></div>";
         }
-        header("Location: index.php");
+
       }
     }
     ?>
@@ -140,7 +146,7 @@ if(!isset($_COOKIE['user'])){
               <ul>
                 <li><?php echo "- <span id='zeichen'>" . strlen($_POST['text']) . "</span> (" . strlen($_POST['text']) . " * 1)"; ?></li>
                 <li id="rechnung-bild">- <span id="bilder">0</span> (0*20)</li>
-                <li class="summe"><?php
+                <li class="summe" id="rechnung-summe"><?php
                   $summe = (strlen($_POST['text']) + ($bilder*20));
                   if(strlen($summe) == 1){
                     echo "- 00.0" . $summe . "€";
@@ -153,8 +159,6 @@ if(!isset($_COOKIE['user'])){
                     $summe = substr_replace($summe, ".", 2, 0);
                     echo "- " . $summe . "€";
                   }
-
-
                 ?></li>
               </ul>
             </div>
@@ -234,28 +238,41 @@ if(!isset($_COOKIE['user'])){
     }
 
     function addBild(id) {
+      // bilder = Wie viele Bilder schon gesetzt wurden
       var bilder = document.getElementById("bilder").innerHTML;
-      if(document.getElementById(id).value != 0){
-        bilder = parseInt(bilder) + 1;
-      } else {
+      // Wenn Bilder nicht gleich 0 | Es wurde schon ein Bild gesetzt
+      if(bilder != "0"){
         bilder = parseInt(bilder) + -1;
+
       }
+      var b1 = document.getElementById("bild1").value;
+      var b2 = document.getElementById("bild2").value;
+      var b3 = document.getElementById("bild3").value;
+      var bild = [b1,b2,b3];
+      var bilder = 0;
+      bild.forEach((item, i) => {
+        if(item != 0){
+          bilder++;
+        }
+      });
+
       document.getElementById("rechnung-bild").innerHTML =  "- <span id='bilder'>" + bilder + "</span>(" + bilder + " * 20)";
+      // Bilder und Zeichen als Variabel
       var bilderSumme = bilder*20;
       var textSumme = document.getElementById("zeichen").innerHTML;
 
-      var summe = bilderSumme + parseInt(textSumme);
-      var summe = toString(summe);
-      if(summe.length == 1){
-        summe = "00.0" + summe + "€";
-      } else if(summe.length == 2) {
-        summe = "00." + summe + "€";
-      } else if(summe.length == 3){
-        summe = "0" + summe.substring(1,1) + "." + summe.substring(3,4);
+      var summe = (parseInt(bilderSumme) + parseInt(textSumme));
+      var summeLength = summe.toString().length;
+      if(summeLength == 1){
+        summe = "- 00.0" + summe + "€";
+      } else if(summeLength == 2) {
+        summe = "- 00." + summe + "€";
+      } else if(summeLength == 3){
+        summe = "- 0" + summe.toString().substring(0,1) + "." + summe.toString().substring(1,3) +"€";
       } else {
-        //summe = summe.substring(1,2) + "." + summe.substring(3,4);
+        summe = "- " + summe.substring(0,2) + "." + summe.substring(1,4) +"€";
       }
-      alert(summe.length + " - " + (parseInt(bilderSumme) + parseInt(textSumme)) + " - " + summe);
+      document.getElementById("rechnung-summe").innerHTML = summe;
     }
 
     function insertString(string, insertion, place) {

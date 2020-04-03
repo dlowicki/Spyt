@@ -120,8 +120,11 @@ function createZahlung($zkn, $zkt, $zad, $anzID) {
 }
 
 function trueDate($date) {
-  if($date != "0000-00-00"){
+  if($date != "0000-00-00" && preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2}/", $date)){
+    $exp = explode("-",$date);
+    if($exp[1] <= "12" && $exp[1] != "00" && $exp[2] <= "31" && $exp[2] != "00"){
     return true;
+    }
   }
   return false;
 }
@@ -161,7 +164,7 @@ function getRubrikColor($id) {
 function getAnzeigen() {
   $conn = connect();
   $spalten = "anzeigeID, anzeigeName, anzeigeVorname, anzeigePLZ, anzeigeStrasse, anzeigeTNR, anzeigeDatum, textUeberschrift, texteText, Rubrik, rubrikFarbe";
-  $statement = "SELECT $spalten FROM anzeige INNER JOIN bilder ON anzeige.anzeigeID = bilder.anzID INNER JOIN texte ON bilder.anzID = texte.anzID INNER JOIN anz_rubrik ON texte.anzID = anz_rubrik.anzID INNER JOIN rubriken ON anz_rubrik.rubID = rubriken.rubrikenID";
+  $statement = "SELECT DISTINCT $spalten FROM anzeige INNER JOIN bilder ON anzeige.anzeigeID = bilder.anzID INNER JOIN texte ON bilder.anzID = texte.anzID INNER JOIN anz_rubrik ON texte.anzID = anz_rubrik.anzID INNER JOIN rubriken ON anz_rubrik.rubID = rubriken.rubrikenID";
   $result = $conn -> query($statement);
   $daten = array();
 
