@@ -138,8 +138,8 @@ if(!isset($_COOKIE['user'])){
                 <tr><td>Bilder: </td><td><?php echo $bilder; ?></td></tr>
               </table>
               <ul>
-                <li><?php echo "- " . strlen($_POST['text']) . " (" . strlen($_POST['text']) . " * 1)"; ?></li>
-                <li><?php echo "- " . ($bilder*20) . " (" . $bilder . " * 20)"; ?></li>
+                <li><?php echo "- <span id='zeichen'>" . strlen($_POST['text']) . "</span> (" . strlen($_POST['text']) . " * 1)"; ?></li>
+                <li id="rechnung-bild">- <span id="bilder">0</span> (0*20)</li>
                 <li class="summe"><?php
                   $summe = (strlen($_POST['text']) + ($bilder*20));
                   if(strlen($summe) == 1){
@@ -190,9 +190,9 @@ if(!isset($_COOKIE['user'])){
 
                 <div id="form-upload">
                   <h3>Bilder hinzufügen:</h3>
-                  <input type="file" name="bild1" id="bild1" accept="image/*" onchange="addBild()">
-                  <input type="file" name="bild2" id="bild2" accept="image/*" onchange="addBild()">
-                  <input type="file" name="bild3" id="bild3" accept="image/*" onchange="addBild()">
+                  <input type="file" name="bild1" id="bild1" accept="image/*" onchange="addBild('bild1');">
+                  <input type="file" name="bild2" id="bild2" accept="image/*" onchange="addBild('bild2');">
+                  <input type="file" name="bild3" id="bild3" accept="image/*" onchange="addBild('bild3');">
                 </div>
 
                 <div id="form-kredit">
@@ -220,6 +220,7 @@ if(!isset($_COOKIE['user'])){
 
     </div>
 
+    <script src="admin/script.js"></script>
     <script>
     function radioChange(value) {
       document.getElementById("art").innerHTML = value;
@@ -232,8 +233,33 @@ if(!isset($_COOKIE['user'])){
       }
     }
 
-    function addBild() {
+    function addBild(id) {
+      var bilder = document.getElementById("bilder").innerHTML;
+      if(document.getElementById(id).value != 0){
+        bilder = parseInt(bilder) + 1;
+      } else {
+        bilder = parseInt(bilder) + -1;
+      }
+      document.getElementById("rechnung-bild").innerHTML =  "- <span id='bilder'>" + bilder + "</span>(" + bilder + " * 20)";
+      var bilderSumme = bilder*20;
+      var textSumme = document.getElementById("zeichen").innerHTML;
 
+      var summe = bilderSumme + parseInt(textSumme);
+      var summe = toString(summe);
+      if(summe.length == 1){
+        summe = "00.0" + summe + "€";
+      } else if(summe.length == 2) {
+        summe = "00." + summe + "€";
+      } else if(summe.length == 3){
+        summe = "0" + summe.substring(1,1) + "." + summe.substring(3,4);
+      } else {
+        //summe = summe.substring(1,2) + "." + summe.substring(3,4);
+      }
+      alert(summe.length + " - " + (parseInt(bilderSumme) + parseInt(textSumme)) + " - " + summe);
+    }
+
+    function insertString(string, insertion, place) {
+      return string.replace(string[place] + string[place + 1], string[place] + insertion + string[place + 1])
     }
     </script>
 
