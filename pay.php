@@ -2,9 +2,15 @@
 session_start();
 require("admin/script.php");
 
-if(!isset($_COOKIE['user'])){
-  header('Location: account/');
-  return;
+if(isset($_COOKIE['sb_user'])){ // Cookie ist aber gesetzt
+  $userid = openssl_decrypt($_COOKIE['sb_user'], "AES-128-ECB", "key_sb_user"); // Dann erhalte die UserID von cookie
+  if(strlen($userid) >= 1){ // Wenn die String länge von userID >= 1 ist
+    $_SESSION['sb_user'] = getUsernameById($userid, "AES-128-ECB","key_sb_user"); // Dann erhalte Username von UserID
+  } else { // Wenn länge von String nicht >= 1 ist
+    header("Location: account/logout.php");
+  }
+} else {
+    header("Location: account/account.php");
 }
 ?>
 <!DOCTYPE html>
@@ -16,92 +22,58 @@ if(!isset($_COOKIE['user'])){
     <script src="admin/script.js"></script>
   </head>
   <body>
+    <?php require("admin/cookie.php"); // Lade Scripts ?>
     <?php
-    // Wenn er zuvor nicht bei create.php Daten eingegeben hat
-    /*if(!isset($_POST['submit'])){
-      header("Location: index.php");
-      return;
-    }*/
+    if(!isset($_POST['createsubmit'])){ // Wenn er zuvor nicht bei create.php Daten eingegeben hat
+      header("Location: index.php"); // Weiterleitung auf index.php, da er keine Daten bei create.php eingegeben hat
+      return; // PHP Script abbruch
+    }
 
-    if(isset($_POST['ksubmit']) && isset($_POST['kablaufdatum']) && isset($_POST['ktyp']) && isset($_POST['knummer'])){
-      if($_POST['ksubmit'] != ""){
-        $anzID = "";
-        $anzeige = false;
-        $anz_rubrik = false;
-        $orte = false;
-        $text = false;
-        $zahlungsinfo = false;
 
-        if(isset($_COOKIE['user']) && isset($_POST['rubrik'])){
-          $cookie = explode(";", $_COOKIE['user']);
-          $name = $cookie[0];
-          $vorname = $cookie[1];
-          $plz = $cookie[2];
-          $ort = $cookie[3];
-          $strasse = $cookie[4];
-          $tel = $cookie[5];
-          $rubrik = $_POST['rubrik'];
-          $date = echoDate();
-          // Daten überprüft Anzeige, anz_rubrik und Orte können in Datenbank eingetragen werden
-          $anzeige = true;
-          $anz_rubrik = true;
-          $orte = true;
-        }
-
-        if(isset($_POST['rubrik'])){
+    if(isset($_POST['paysubmit'])){ // paysubmit wurde gesetzt = Button betätigt
+        $check1 = false;
+        if(isset($_COOKIE['sb_user']) && isset($_POST['rubrik']) && isset($_SESSION['sb_user'])){ // cookie rubrik und session sind gesetzt
+          $rubrikID = $_POST['rubrik']; // erhalten ausgewählte RubrikID
+          $date = echoDate(); // erhalte aktuelles Datum
           $ueberschrift = $_POST['ueberschrift'];
           $text = $_POST['text'];
-          if(checkText($text)){
-            // Text kann in Datenbank eingetragen werden
-            $texte = true;
-          } else {
+          $check1 = true;
+          if(checkVariableString($text, 250) == "" || checkVariableString($ueberschrift, 50) == ""){ // Wenn checkVariableString
             echo "<div id='error'><h4>Der von Ihnen eingegeben Text ist zu lang!</h4></div>";
+            $check1 = false;
           }
+
         }
 
-        if(isset($_POST['kablaufdatum']) && isset($_POST['ktyp']) && isset($_POST['knummer'])){
-            $knummer = $_POST['knummer'];
-            $kablaufdatum = $_POST['kablaufdatum'];
-          if(trueDate($kablaufdatum) && checkKartenNummer((int) $knummer)){
-            $typ = $_POST['ktyp'];
-            // zahlungsinfo kann in Datenbank eingetragen werden
-            $zahlungsinfo = true;
-          } else {
-            echo "<div id='error'><h4>Die Daten der Kreditkarte sind nicht korrekt!</h4></div>";
-          }
-        }
+        if($check1 == true){ // Wenn alle Eintragungen fehlerfrei eingetragen werden können
+          $textID = uniqid();
+          $userID = openssl_decrypt($_COOKIE['sb_user'], "AES-128-ECB", "key_sb_user");
+          $anzID = createAnzeige($userID,$textID,$rubrikID,$date);
 
-        // Wenn alle Eintragungen fehlerfrei eingetragen werden können
-        if($anzeige == true && $anz_rubrik == true && $orte == true  && $texte == true && $zahlungsinfo == true){
-          $anzID = createAnzeige($name,$vorname,$plz,$ort,$strasse,$tel,$rubrik,$date);
-          createZahlung($knummer,$typ,$kablaufdatum,$anzID);
-          compareTexte($ueberschrift, $text, $anzID);
-          compareAnzeigeAndRubrik($anzID, $rubrik);
-          createOrt($plz, $ort);
-
-
-          if(isset($_FILES['bild1']) || isset($_FILES['bild2']) || isset($_FILES['bild3'])){
-            for($t=1;$t<4;$t++){
-              // Wenn Bild gesetzt ist und size > 0
-              if($_FILES["bild$t"]['size'] > 0){
-                $dir = "img/";
-                $file = $dir . basename($_FILES["bild$t"]['name']);
-                $check = getimagesize($_FILES["bild$t"]["tmp_name"]);
-                if($check !== false){
-                  if(file_exists($file)){
-                    compareBilder($file, $anzID);
+          if(compareTexte($textID, $ueberschrift, $text, $anzID)){
+            $bilderCount = 1;
+            if(isset($_FILES['bild1']) || isset($_FILES['bild2']) || isset($_FILES['bild3'])){
+              for($t=1;$t<4;$t++){
+                if($_FILES["bild$t"]['size'] > 0){ // Wenn Bild gesetzt ist und size > 0
+                  $dir = "img/";
+                  $file = $dir . basename($_FILES["bild$t"]['name']);
+                  $check = getimagesize($_FILES["bild$t"]["tmp_name"]);
+                  if($check !== false){
+                    if(file_exists($file)){
+                      $cp = compareBilder($file, $anzID);
+                      continue;
+                    }
+                    if(!move_uploaded_file($_FILES["bild$t"]["tmp_name"], $file)){
+                      echo "<div id='error'><p>Die Bilder konnten nicht hochgeladen werden! [87]</p></div>";
+                    } else {
+                      compareBilder($file, $anzID);
+                      $bilderCount++;
+                      continue;
+                    }
+                  } else {
+                    echo "<div id='error'><p>Die Bilder konnten nicht hochgeladen werden! [89]</p></div>";
                     continue;
                   }
-                  if(!move_uploaded_file($_FILES["bild$t"]["tmp_name"], $file)){
-                    echo "<div id='error'><p>Die Bilder konnten nicht hochgeladen werden! [87]</p></div>";
-                  } else {
-                    compareBilder($file, $anzID);
-                  }
-                  //$imageData = file_get_contents($_FILES["bild$t"]["tmp_name"]);
-                  //echo sprintf('<img src="data:image/png;base64,%s" class="pay-vorschau-img">', base64_encode($imageData));
-                } else {
-                  echo "<div id='error'><p>Die Bilder konnten nicht hochgeladen werden! [89]</p></div>";
-                  continue;
                 }
               }
             }
@@ -111,12 +83,24 @@ if(!isset($_COOKIE['user'])){
           echo "<div id='error'><p>Fehler wurde erzeugt</p></div>";
         }
 
-      }
     }
     ?>
     <div id="header">
       <h1><a href="index.php">Schwarzes Brett</a></h1>
-      <img src="img/icon/account.svg" onClick="registerUser()">
+      <div class="icon-account-dropdown" onClick="displayAccount()">
+  			<img src="img/icon/account.svg" id="icon-account">
+        <div class="icon-account-data" id="icon-account-data">
+  				<?php
+  				if(isset($_SESSION['sb_user'])){ // Wenn Session sb_user gesetzt ist
+  					echo "<h5>" . $_SESSION['sb_user'] . "</h5>"; // Namen im Dropdown setzen von Session sb_user
+  					echo "<a href='account/logout.php'>Abmelden</a>";
+  				} else { // Wenn Session sb_user nicht gesetzt ist
+  					echo "<h5>Gast</h5>";
+            echo "<a href='account/account.php'>Anmelden</a>";
+  				}
+  				?>
+  			</div>
+  		</div>
     </div>
 
     <div id="main-pay">
@@ -163,31 +147,10 @@ if(!isset($_COOKIE['user'])){
               </ul>
             </div>
 
-            <div id="pay-bezahlung">
-              <div class="pay-bezahlung-radio">
-                <div class="bezahlung">
-                  <img src="img/icon/paypal.jpg">
-                  <p><input type="radio" id="paypal" name="bezahlung" value="paypal" onchange="radioChange('PayPal')"> PayPal</p>
-                </div>
-                <div class="bezahlung">
-                  <img src="img/icon/paysafecard.png">
-                  <p><input type="radio" id="paysafe" name="bezahlung" value="paysafe" onchange="radioChange('PaySafeCard')"> PaySafeCard</p>
-                </div>
-                <div class="bezahlung">
-                  <img src="img/icon/ueberweisung.png">
-                  <p><input type="radio" id="ueberweisung" name="bezahlung" value="ueberweisung" onchange="radioChange('Überweisung')"> Überweisung</p>
-                </div>
-                <div class="bezahlung">
-                  <img src="img/icon/Kreditkarte.png">
-                  <p><input type="radio" id="kreditkarte" name="bezahlung" value="kreditkarte" onchange="radioChange('Kreditkarte')" checked> Kreditkarte</p>
-                </div>
-              </div>
-            </div>
             <div class="pay-form">
-              <h3 id="art">Kreditkarte</h3>
-              <p id="pay-error">Das ausgewählte Bezahlsystem ist im moment nicht verfügbar</p>
               <form action="pay.php" method="POST" id="pay-form-hide" enctype="multipart/form-data">
                 <input type="hidden" name="ueberschrift" value="<?php echo $_POST['ueberschrift']; ?>">
+                <input type="hidden" name="createsubmit" value=" ">
                 <input type="hidden" name="text" value="<?php echo $_POST['text']; ?>">
                 <input type="hidden" name="user" value="<?php echo $_POST['user']; ?>">
                 <input type="hidden" name="rubrik" value="<?php echo $_POST['rubrik']; ?>">
@@ -198,19 +161,7 @@ if(!isset($_COOKIE['user'])){
                   <input type="file" name="bild2" id="bild2" accept="image/*" onchange="addBild('bild2');">
                   <input type="file" name="bild3" id="bild3" accept="image/*" onchange="addBild('bild3');">
                 </div>
-
-                <div id="form-kredit">
-                  <input type="text" name="kuser" placeholder="Vorname Name" value="<?php echo $_POST['user']; ?>" readonly><br>
-                  <input type="text" name="knummer" placeholder="Kartennummer"><br>
-                  <select name="ktyp">
-                    <option value="Charge">Charge-Kreditkarte</option>
-                    <option value="Revolving">Revolving-Kreditkarte</option>
-                    <option value="Prepaid">Prepaid-Kreditkarte</option>
-                    <option value="Debit">Debit-Karte</option>
-                  </select><br>
-                  <input type="date" name="kablaufdatum" placeholder=""><br>
-              </div>
-              <input type="submit" name="ksubmit" value="Erstellen">
+                <input type="submit" name="paysubmit" value="Erstellen">
               </form>
             </div>
           </div>
@@ -226,17 +177,6 @@ if(!isset($_COOKIE['user'])){
 
     <script src="admin/script.js"></script>
     <script>
-    function radioChange(value) {
-      document.getElementById("art").innerHTML = value;
-      if(value != "Kreditkarte"){
-        document.getElementById("pay-form-hide").style.display = "none";
-        document.getElementById("pay-error").style.display = "block";
-      } else {
-        document.getElementById("pay-form-hide").style.display = "block";
-        document.getElementById("pay-error").style.display = "none";
-      }
-    }
-
     function addBild(id) {
       // bilder = Wie viele Bilder schon gesetzt wurden
       var bilder = document.getElementById("bilder").innerHTML;

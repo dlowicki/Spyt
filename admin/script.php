@@ -14,38 +14,66 @@ function connect() {
   $password = $data['password'];
   $db = $data['database'];
 
-  // Create connection
-  $conn = new mysqli($servername, $username, $password, $db);
+  $conn = new mysqli($servername, $username, $password, $db); // Create connection
 
-  // Check connection
-  if ($conn->connect_error) {
+  if ($conn->connect_error) {   // Check connection
       die("Connection failed: " . $conn->connect_error);
       return false;
   }
   return $conn;
 }
 
-function getRubriken() {
-  $conn = connect();
-  $statement = "SELECT * FROM rubriken";
-  $result = $conn -> query($statement);
-  $data = array();
+function createUser($userName, $userVorname, $benutzername,$userMail, $userPassword) {
+  $con = connect();
+  $userIP = isset($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] : isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+  $statement = "INSERT INTO sb_user (userID, userName, userVorname, userBenutzername, userMail, userPassword, userIP) VALUES (NULL, '$userName', '$userVorname', '$benutzername', '$userMail', '$userPassword', '$userIP')";
+  $result = $con -> query($statement);
 
-  if($result->num_rows > 0){
-    while($row = $result->fetch_assoc()){
-       $data[$row['rubrikenID']] = $row['Rubrik'];
+  if($result === TRUE){
+    $requestID = $con -> query("SELECT userID FROM sb_user WHERE userMail = '$userMail'");
+    if($requestID->num_rows > 0){
+      foreach ($requestID as $key) {
+        return $key['userID'];
+      }
     }
-    return $data;
   }
   return false;
 }
 
-function createAnzeige($name,$vorname,$plz,$ort,$strasse,$tel,$rubrikID,$date) {
+function userExist($benutzername) {
+  $con = connect();
+  $parameter = "SELECT userBenutzername FROM sb_user WHERE sb_user.userBenutzername = '$benutzername'";
+  $result = $con -> query($parameter);
+
+  if($result->num_rows > 0){
+    foreach ($result as $key) {
+      if($key['userBenutzername'] == $benutzername) {
+        return 1;
+      }
+    }
+  }
+  return false;
+}
+
+function loginUser($name, $pw) {
+  $con = connect();
+  $statement = "SELECT userPassword, userID FROM sb_user WHERE userBenutzername = '$name' LIMIT 1";
+  $result = $con -> query($statement);
+
+  foreach ($result as $key) {
+    if(password_verify($pw, $key['userPassword'])){
+      return $key['userID'];
+    }
+  }
+  return false;
+}
+
+function createAnzeige($userID, $texteID, $rubrikenID, $date) {
   $conn = connect();
-  $statement = "INSERT INTO anzeige (anzeigeID, anzeigeName, anzeigeVorname, anzeigePLZ, anzeigeStrasse, anzeigeTNR, anzeigeDatum) VALUES (NULL, '$name', '$vorname', '$plz', '$strasse', '$tel', '$date')";
+  $statement = "INSERT INTO sb_anzeige (anzeigeID, userID, texteID, rubrikenID, anzeigeDatum) VALUES (NULL, '$userID', '$texteID', '$rubrikenID', '$date')";
   $result = $conn -> query($statement);
   if($result === TRUE){
-    $statement2 = "SELECT MAX(anzeigeID) as id FROM anzeige";
+    $statement2 = "SELECT MAX(anzeigeID) as id FROM sb_anzeige";
     $result2 = $conn -> query($statement2);
     $data = "";
     if($result2->num_rows == 1){
@@ -60,20 +88,9 @@ function createAnzeige($name,$vorname,$plz,$ort,$strasse,$tel,$rubrikID,$date) {
   return false;
 }
 
-function compareAnzeigeAndRubrik($anzeigeID, $rubrikID) {
+function compareTexte($textID, $ueberschrift,  $text, $anzID) {
   $conn = connect();
-  $statement = "INSERT INTO anz_rubrik (anzID, rubID) VALUES ('$anzeigeID', '$rubrikID')";
-  $result = $conn -> query($statement);
-
-  if($result === TRUE){
-    return true;
-  }
-  return false;
-}
-
-function compareTexte($ueberschrift,  $text, $anzID) {
-  $conn = connect();
-  $statement = "INSERT INTO texte (texteID, textUeberschrift, texteText, anzID) VALUES (NULL, '$ueberschrift', '$text', '$anzID')";
+  $statement = "INSERT INTO sb_texte (texteID, texteUeberschrift, texteText, anzeigeID) VALUES ('$textID', '$ueberschrift', '$text', '$anzID')";
   $result = $conn -> query($statement);
 
   if($result === TRUE){
@@ -84,33 +101,7 @@ function compareTexte($ueberschrift,  $text, $anzID) {
 
 function compareBilder($bild, $anzID) {
   $conn = connect();
-  $statement = "INSERT INTO bilder (bilderID, bilderDatei, anzID) VALUES (NULL, '$bild', '$anzID')";
-  $result = $conn -> query($statement);
-
-  if($result === TRUE){
-    return true;
-  }
-  return false;
-}
-
-function createOrt($plz, $ort) {
-  $conn = connect();
-  $statementAbfrage = "SELECT ortePLZ FROM Orte WHERE ortePLZ = '$plz'";
-  $result = $conn -> query($statementAbfrage);
-
-  if($result->num_rows == 0) {
-    $statementInsert = "INSERT INTO Orte (ortePLZ, orteOrt) VALUES ('$plz', '$ort')";
-    $result2 = $conn -> query($statementInsert);
-    if($result2 === TRUE){
-      return true;
-    }
-  }
-  return false;
-}
-
-function createZahlung($zkn, $zkt, $zad, $anzID) {
-  $conn = connect();
-  $statement = "INSERT INTO zahlungsinfo (zID, zKarten_Nummer, zKartenTyp, zAblaufdatum, anzID) VALUES (NULL,'$zkn','$zkt','$zad','$anzID')";
+  $statement = "INSERT INTO sb_bilder (bilderID, bilderDatei, anzeigeID) VALUES (NULL, '$bild', '$anzID')";
   $result = $conn -> query($statement);
 
   if($result === TRUE){
@@ -129,13 +120,6 @@ function trueDate($date) {
   return false;
 }
 
-function checkKartenNummer($nummer) {
-  if(strlen($nummer) >= 12 && strlen($nummer) <= 16 && is_int($nummer)){
-    return true;
-  }
-  return false;
-}
-
 function checkText($text) {
   if(strlen($text) <= 250 && strlen($text) > 0){
     return true;
@@ -143,67 +127,139 @@ function checkText($text) {
   return false;
 }
 
-function getRubrikColor($id) {
-  switch($id){
-    case 1:
-    return "blue";
-    break;
-    case 2:
-    return "yellow";
-    break;
-    case 3:
-    return "purple";
-    break;
-    case 4:
-    return "orange";
-    break;
+function checkVariableString($var, $length) { // Eingaben dürfen nicht länger als $length Zeichen lang sein und nur Zahlen + Buchstaben enthalten
+  $html = htmlspecialchars($var); // htmlspecialchars werden unleserlich gemacht
+  ini_set("display_errors","off");
+  if(strlen($html) <= $length && !preg_match('/[^A-Za-z0-9_äÄöÖüÜß!?-.,#+§\ ]+/', $var)) { // Wenn länge von $var kleiner gleich $length und kein Fehler gefunden
+    return $html; // String wird zurückgegeben
   }
-  return "black";
+  ini_set("display_errors","on");
+  return "";
 }
 
-function getAnzeigen() {
+/* GET FUNKTIONEN */
+
+function getRubriken() {
   $conn = connect();
-  $spalten = "anzeigeID, anzeigeName, anzeigeVorname, anzeigePLZ, anzeigeStrasse, anzeigeTNR, anzeigeDatum, textUeberschrift, texteText, Rubrik, rubrikFarbe";
-  $statement = "SELECT DISTINCT $spalten FROM anzeige INNER JOIN bilder ON anzeige.anzeigeID = bilder.anzID INNER JOIN texte ON bilder.anzID = texte.anzID INNER JOIN anz_rubrik ON texte.anzID = anz_rubrik.anzID INNER JOIN rubriken ON anz_rubrik.rubID = rubriken.rubrikenID";
+  $statement = "SELECT * FROM rubriken";
   $result = $conn -> query($statement);
-  $daten = array();
+  $data = array();
 
   if($result->num_rows > 0){
-    $r = 0;
     while($row = $result->fetch_assoc()){
-      $daten[$r]['id'] = $r;
-      $daten[$r]['anzeigeID'] = $row['anzeigeID'];
-      $daten[$r]['anzeigeName'] = $row['anzeigeName'];
-      $daten[$r]['anzeigeVorname'] = $row['anzeigeVorname'];
-      $daten[$r]['anzeigePLZ'] = $row['anzeigePLZ'];
-      $daten[$r]['anzeigeStrasse'] = $row['anzeigeStrasse'];
-      $daten[$r]['anzeigeTNR'] = $row['anzeigeTNR'];
-      $daten[$r]['anzeigeDatum'] = $row['anzeigeDatum'];
-      $daten[$r]['textUeberschrift'] = $row['textUeberschrift'];
-      $daten[$r]['texteText'] = $row['texteText'];
-      $daten[$r]['Rubrik'] = $row['Rubrik'];
-      $daten[$r]['rubrikFarbe'] = $row['rubrikFarbe'];
-      $r++;
+       $data[$row['rubrikenID']] = $row['Rubrik'];
     }
-      return $daten;
+    return $data;
   }
   return false;
 }
 
-function getBilder($id) {
+function getUsernameById($id) {
+  $con = connect();
+  $parameter = "SELECT DISTINCT userBenutzername FROM sb_user WHERE sb_user.userID = '$id'";
+  $result = $con -> query($parameter);
+
+  if($result->num_rows > 0){
+    foreach ($result as $key) {
+      return $key['userBenutzername'];
+    }
+  }
+  return false;
+}
+
+function getUserData($id) {
+  $con = connect();
+  $parameter = "SELECT DISTINCT * FROM sb_user WHERE sb_user.userID = '$id'";
+  $result = $con -> query($parameter);
+
+  $daten = array();
+  if($result->num_rows > 0){
+    foreach ($result as $row) {
+      $daten['userName'] = $row['userName'];
+      $daten['userVorname'] = $row['userVorname'];
+      $daten['userBenutzername'] = $row['userBenutzername'];
+      $daten['userMail'] = $row['userMail'];
+      $daten['userIP'] = $row['userIP'];
+      $daten['userStrasse'] = $row['userStrasse'];
+      $daten['userTelefon'] = $row['userTelefon'];
+      $daten['userCreated'] = $row['userCreated'];
+    }
+    return $daten;
+  }
+  return false;
+}
+
+function getAnzeigen() { // Funktion getAnzeige
+  $conn = connect(); // erhalte Verbindung mit Datenbank
+  $spalten = "sb_anzeige.anzeigeID, anzeigeDatum, texteUeberschrift, texteText, Rubrik, rubrikFarbe, userBenutzername, userMail"; // gesuchten SELECT Werte für parameter
+  $statement = "SELECT DISTINCT $spalten FROM sb_anzeige INNER JOIN sb_texte ON sb_anzeige.anzeigeID = sb_texte.anzeigeID INNER JOIN rubriken ON sb_anzeige.rubrikenID = rubriken.rubrikenID INNER JOIN sb_user WHERE sb_anzeige.userID = sb_user.userID ORDER BY anzeigeID DESC";
+  $result = $conn -> query($statement); // query mit passendem parameter
+
+  $daten = array(); // array zum speichern der erhaltenen Daten
+  $r = 0; // counter zum hochzählen
+  foreach($result as $row){ // Für jedes result als $row
+    $daten[$r]['id'] = $r;
+    $daten[$r]['anzeigeID'] = $row['anzeigeID'];
+    $daten[$r]['anzeigeDatum'] = $row['anzeigeDatum'];
+    $daten[$r]['texteUeberschrift'] = $row['texteUeberschrift'];
+    $daten[$r]['texteText'] = $row['texteText'];
+    $daten[$r]['Rubrik'] = $row['Rubrik'];
+    $daten[$r]['rubrikFarbe'] = $row['rubrikFarbe'];
+    $daten[$r]['userBenutzername'] = $row['userBenutzername'];
+    $daten[$r]['userMail'] = $row['userMail'];
+    $r++;
+  }
+  return $daten;
+}
+
+function getAnzeigenFilter($rubrik) {
   $conn = connect();
-  $statement = "SELECT bilderDatei, bilderID FROM bilder WHERE bilder.anzID = '$id'";
+  $spalten = "sb_anzeige.anzeigeID, anzeigeDatum, texteUeberschrift, texteText, Rubrik, rubrikFarbe, userBenutzername, userMail";
+  $statement = "SELECT DISTINCT $spalten FROM sb_anzeige INNER JOIN sb_texte ON sb_anzeige.anzeigeID = sb_texte.anzeigeID INNER JOIN rubriken ON sb_anzeige.rubrikenID = rubriken.rubrikenID INNER JOIN sb_user ON sb_anzeige.userID = sb_user.userID WHERE rubriken.Rubrik = '$rubrik' ORDER BY anzeigeID DESC";
   $result = $conn -> query($statement);
   $daten = array();
 
-  if($result->num_rows > 0) {
-    $r = 0;
-    while($row = $result->fetch_assoc()) {
-      $daten[$r]['bilderDatei'] = $row['bilderDatei'];
-      $daten[$r]['bilderID'] = $row['bilderID'];
-      $r++;
+  $r = 0;
+  foreach($result as $row){ // Für jedes result als $row
+    $daten[$r]['id'] = $r;
+    $daten[$r]['anzeigeID'] = $row['anzeigeID'];
+    $daten[$r]['anzeigeDatum'] = $row['anzeigeDatum'];
+    $daten[$r]['texteUeberschrift'] = $row['texteUeberschrift'];
+    $daten[$r]['texteText'] = $row['texteText'];
+    $daten[$r]['Rubrik'] = $row['Rubrik'];
+    $daten[$r]['rubrikFarbe'] = $row['rubrikFarbe'];
+    $daten[$r]['userBenutzername'] = $row['userBenutzername'];
+    $daten[$r]['userMail'] = $row['userMail'];
+    $r++;
+  }
+  return $daten;
+}
+
+function getBilder($id) {
+  $conn = connect();
+  $statement = "SELECT sb_bilder.bilderDatei FROM sb_bilder WHERE sb_bilder.anzeigeID = '$id'";
+  $result = $conn -> query($statement);
+
+  $daten = array();
+  $r = 0;
+  foreach ($result as $row) {
+    $daten[$r]['bilderDatei'] = $row['bilderDatei'];
+    $r++;
+  }
+  return $daten;
+}
+
+function getFarben() {
+  $con = connect();
+  $statement = "SELECT Rubrik, rubrikFarbe FROM rubriken";
+  $result = $con -> query($statement);
+  $colors = array();
+
+  if($result->num_rows > 0){
+    while($row = $result->fetch_assoc()){
+      $colors[$row['Rubrik']] = $row['rubrikFarbe'];
     }
-    return $daten;
+    return $colors;
   }
   return false;
 }
